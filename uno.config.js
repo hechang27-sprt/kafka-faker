@@ -12,9 +12,9 @@ exports.default = (0, unocss_1.defineConfig)({
         (0, unocss_1.presetTypography)(),
         (0, unocss_1.presetWebFonts)({
             fonts: {
-                sans: 'DM Sans',
-                serif: 'DM Serif Display',
-                mono: 'DM Mono',
+                sans: "DM Sans",
+                serif: "DM Serif Display",
+                mono: "DM Mono",
             },
         }),
     ],

@@ -1,6 +1,15 @@
 // @ts-check
-import withNuxt from './.nuxt/eslint.config.mjs'
+import withNuxt from "./.nuxt/eslint.config.mjs";
 
-export default withNuxt(
-
-)
+export default withNuxt([
+    {
+        rules: {
+            "vue/no-unused-vars": [
+                "error",
+                {
+                    ignorePattern: "^_",
+                },
+            ],
+        },
+    },
+]);

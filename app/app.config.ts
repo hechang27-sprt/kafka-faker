@@ -1,9 +1,9 @@
 export default defineAppConfig({
-    title: 'Kafka Faker',
+    title: "Kafka Faker",
     theme: {
         dark: true,
         colors: {
-            primary: '#ff0000',
+            primary: "#ff0000",
         },
     },
-})
+});
