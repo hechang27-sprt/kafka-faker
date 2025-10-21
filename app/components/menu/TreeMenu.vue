@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { ElMenu, ElSubMenu } from 'element-plus';
-
 export interface MenuTree {
-    key: string;
+    // key: string;
     label: string;
     children?: MenuData;
     pathSegment?: string;
@@ -12,19 +10,38 @@ export interface MenuTree {
 
 export type MenuData = Record<string, MenuTree>;
 
-interface Props {
-    data: MenuData;
-    isRoot: boolean;
-    index: string;
+export interface MenuContext {
+    basePath: string;
 }
 
-const { data, isRoot = true, index = "" } = defineProps<Props>();
+interface Props {
+    data: MenuData;
+}
+
+export interface SlotProps {
+    data: MenuTree;
+    index: string;
+    path?: string;
+}
+
+defineSlots<{
+    default(props: SlotProps): unknown;
+}>();
+
+const { data } = defineProps<Props>();
 </script>
 
 <template>
-    <el-tree>
-
-    </el-tree>
+    <!-- @vue-generic {MenuContext} -->
+    <provide-props :provides="{ basePath: '/' }">
+        <el-menu :default-active="$route.path">
+            <tree-menu-inner :data>
+                <template #default="slotProps: SlotProps">
+                    <slot v-bind="slotProps" />
+                </template>
+            </tree-menu-inner>
+        </el-menu>
+    </provide-props>
 </template>
 
 <style scoped></style>

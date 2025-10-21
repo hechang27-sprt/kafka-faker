@@ -10,7 +10,12 @@ import {
 } from "unocss";
 
 export default defineConfig({
-    shortcuts: [],
+    shortcuts: [
+        {
+            "blockify-fill-wh":
+                "block w-full h-full decoration-none color-inherit",
+        },
+    ],
     presets: [
         presetWind4(),
         presetAttributify(),

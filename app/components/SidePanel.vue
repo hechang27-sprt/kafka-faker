@@ -1,27 +1,11 @@
 <template>
-    <el-tree style="max-width: 200px" :data="data" :props="defaultProps" />
+    <tree-menu :data="menuData" />
 </template>
 
 <script lang="ts" setup>
-interface Tree {
-    label: string;
-    children?: Tree[];
-}
+const { menuData, addServer, removeServer } = useMenuData();
 
-const defaultProps = {
-    children: "children",
-    label: "label",
-};
-
-const data: Tree[] = [
-    {
-        label: "Kafka Server 1",
-    },
-    {
-        label: "Kafka Server 2",
-    },
-    {
-        label: "Kafka Server 3",
-    },
-];
+addServer("10.100.0.150:9092", "kafka150");
+addServer("10.100.0.225:9092", "kafka225");
+addServer("https://example.com:9092", "kafka-remote");
 </script>

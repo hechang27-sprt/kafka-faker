@@ -4,14 +4,14 @@ type WithSubmenu = Omit<MenuTree, "children"> & {
     children: MenuData;
 };
 
-interface GlobalMenu {
+interface GlobalMenu extends MenuData {
     dashboard: MenuTree;
     schemas: MenuTree;
     servers: WithSubmenu;
 }
 
-export const useMenuData = defineStore("menu", {
-    state: (): GlobalMenu => ({
+export const useMenuData = defineStore("menu", () => {
+    const menuData: Ref<GlobalMenu> = ref({
         dashboard: {
             key: "dashboard",
             label: "Dashboard",
@@ -20,7 +20,7 @@ export const useMenuData = defineStore("menu", {
         schemas: {
             key: "schemas",
             label: "Schemas",
-            pathSegment: "schema",
+            pathSegment: "schemas",
         },
         servers: {
             key: "servers",
@@ -28,43 +28,43 @@ export const useMenuData = defineStore("menu", {
             pathSegment: "server",
             children: {},
         },
-    }),
+    });
 
-    actions: {
-        addServer(bootstrapServer: string, label?: string) {
-            const server: MenuTree = {
-                key: `bootstrapServer@${bootstrapServer}`,
-                label: label ?? bootstrapServer,
-                pathSegment: bootstrapServer,
-                children: {
-                    produce: {
-                        key: `produce@${bootstrapServer}`,
-                        label: "Produce",
-                        pathSegment: "produce",
-                    },
-                    consume: {
-                        key: `consume@${bootstrapServer}`,
-                        label: "Consume",
-                        pathSegment: "consume",
-                    },
-                    topics: {
-                        key: `topics@${bootstrapServer}`,
-                        label: "Topics",
-                        pathSegment: "topics",
-                    },
+    function addServer(bootstrapServer: string, label?: string) {
+        const server: MenuTree = {
+            label: label ?? bootstrapServer,
+            pathSegment: encodeURIComponent(bootstrapServer),
+            children: {
+                produce: {
+                    label: "Produce",
+                    pathSegment: "produce",
                 },
-            };
+                consume: {
+                    label: "Consume",
+                    pathSegment: "consume",
+                },
+                topics: {
+                    label: "Topics",
+                    pathSegment: "topics",
+                },
+            },
+        };
+        const key = `bootstrapServer@${bootstrapServer}`;
 
-            this.servers.children = {
-                ...this.servers.children,
-                [server.key]: server,
-            };
-        },
+        const { servers } = menuData.value;
 
-        removeServer(bootstrapServer: string) {
-            const key = `bootstrapServer@${bootstrapServer}`;
-            const { [key]: _, ...newChildren } = this.servers.children;
-            this.servers.children = newChildren;
-        },
-    },
+        servers.children = {
+            ...servers.children,
+            [key]: server,
+        };
+    }
+
+    function removeServer(bootstrapServer: string) {
+        const { servers } = menuData.value;
+        const key = `bootstrapServer@${bootstrapServer}`;
+        const { [key]: _, ...newChildren } = servers.children;
+        servers.children = newChildren;
+    }
+
+    return { menuData, addServer, removeServer };
 });

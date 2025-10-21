@@ -1,8 +1,3 @@
-<script setup lang="ts">
-import DefaultHeader from "~/components/DefaultHeader.vue";
-import SidePanel from "~/components/SidePanel.vue";
-</script>
-
 <template>
     <div class="common-layout">
         <el-container class="m-0">
