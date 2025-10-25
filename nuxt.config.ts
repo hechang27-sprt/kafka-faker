@@ -13,6 +13,7 @@ export default defineNuxtConfig({
         "@nuxt/eslint",
         "@unocss/nuxt",
         "@pinia/nuxt",
+        "@vueuse/nuxt",
     ],
     build: { transpile: ["trpc-nuxt"] },
     app: {
@@ -22,10 +23,24 @@ export default defineNuxtConfig({
     },
     nitro: {
         storage: {
-            db: {
+            schemas: {
                 driver: "fs",
-                base: "./.data/db",
+                base: ".data/schemas",
+            },
+            cache: {
+                driver: "redis",
+                base: process.env.KAFKA_FAKER_STORAGE_CACHE_BASE,
+                host: process.env.KAFKA_FAKER_REDIS_HOST,
+                port: process.env.KAFKA_FAKER_REDIS_PORT,
+                password: process.env.KAFKA_FAKER_REDIS_PASSWORD,
+            },
+            config: {
+                driver: "fs",
+                base: ".data/config",
             },
         },
+    },
+    runtimeConfig: {
+        // ...
     },
 });
