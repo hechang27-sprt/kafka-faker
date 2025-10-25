@@ -136,8 +136,8 @@ async function* readFiles(
 
         let dest = destMap.get(filename);
         let mmmBuffer: Buffer | undefined;
-        let mmmBufferIdx = 0;
-        let firstChunk: Buffer | undefined;
+        let bufferedChunks: Buffer[] = [];
+        let bufferedBytes = 0;
         let mimeTypeChecked = false;
         let bufferedStreamSent = false;
         let aborted = true;
@@ -180,38 +180,18 @@ async function* readFiles(
                 }
 
                 const chunk: Buffer = chunk_;
-                if (!firstChunk) {
-                    if (chunk.byteLength >= mmmagicBufSize) {
-                        yield* checkMimeType(chunk);
-                    }
-
-                    firstChunk = chunk;
-                } else {
-                    if (!mmmBuffer) {
-                        mmmBuffer = Buffer.alloc(
-                            mmmagicBufSize + highWaterMark
-                        );
-                        firstChunk.copy(mmmBuffer, mmmBufferIdx);
-                        mmmBufferIdx += firstChunk.byteLength;
-                    }
-
-                    if (mmmBufferIdx < mmmagicBufSize) {
-                        chunk.copy(mmmBuffer, mmmBufferIdx);
-                        mmmBufferIdx += chunk.byteLength;
-                    } else {
-                        yield* checkMimeType(
-                            mmmBuffer.subarray(0, mmmBufferIdx)
-                        );
-                    }
+                if (bufferedBytes < mmmagicBufSize) {
+                    bufferedChunks.push(chunk);
+                    bufferedBytes += chunk.length;
+                    continue;
                 }
+
+                mmmBuffer = Buffer.concat(bufferedChunks);
+                yield* checkMimeType(mmmBuffer);
 
                 if (mimeTypeChecked) {
                     if (!bufferedStreamSent) {
-                        // check for when the first chunk already fills mmmBuffer
-                        const subarray = mmmBuffer
-                            ? mmmBuffer.subarray(0, mmmBufferIdx)
-                            : firstChunk;
-                        yield* sendBufferOrYield(subarray);
+                        yield* sendBufferOrYield(mmmBuffer);
                         bufferedStreamSent = true;
                     }
 
@@ -219,10 +199,10 @@ async function* readFiles(
                 }
             }
 
-            // check for when file is too small to fill mmmBuffer and has only one chunk
-            if (!mimeTypeChecked && firstChunk) {
-                yield* checkMimeType(firstChunk);
-                yield* sendBufferOrYield(firstChunk);
+            // check for when file has only one chunk
+            if (!mimeTypeChecked && bufferedChunks.length == 1) {
+                yield* checkMimeType(bufferedChunks[0]);
+                yield* sendBufferOrYield(bufferedChunks[0]);
             }
 
             aborted = false;
